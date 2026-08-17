@@ -1,0 +1,56 @@
+/* The settled mermaid diagram: a hover-revealed zoom chip over a scroll
+ * container. Zoom uses the CSS `zoom` property (not transform) so the scaled
+ * size participates in layout — the scroll extent and centering track it.
+ * Chip colors ride the same alias tokens as the CodeBlock banner; the
+ * diagram's own palette comes from mermaid's theme, chosen at init. */
+
+.block {
+  position: relative;
+  margin: 16px 0;
+}
+
+.controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  background: var(--dsw-alias-markdown-code-block-banner);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.block:hover .controls,
+.controls:focus-within {
+  opacity: 1;
+}
+
+.zoomButton {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 4px 8px;
+  min-width: 28px;
+  cursor: pointer;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+.scroll {
+  overflow: auto;
+}
+
+.content {
+  zoom: var(--dsh-mermaid-zoom, 1);
+  /* fit-content + auto margins: centered while narrower than the column,
+     left-aligned (scrollable from the start) once zoomed past it — flex
+     centering would clip the left edge of overflowing content. */
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.content svg {
+  display: block;
+}

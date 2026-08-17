@@ -63,6 +63,10 @@ pnpm exec vitest run packages/interaction/tool-show-svg packages/interaction/too
 4. **catalog 是安全边界**:v1 无 action,模型点不出副作用。宿主校验有意浅(它无法 import 浏览器目录),`CATALOG_GUIDE` 与 catalog.tsx 是手动同步的双胞胎。
 5. **一个客户端插件、两个宿主包**:部署可以只装 svg 不装 ui;ui-embeds 里没被工具喂数据的那半是无害死代码。
 
+## 第三条通道:mermaid 围栏(2026-08-17 加)
+
+拓扑图不走 show 工具:模型在定稿回复里写 ```mermaid 围栏,`render.tsx` 的定稿分支(紧挨 ```math 先例)把它换成 `MermaidBlock`(`packages/client/ui-primitives/src/markdown/MermaidBlock.tsx`)。要点:mermaid@11 按 shiki 懒加载模式动态 import(独立 chunk,gzip ~141K);`securityLevel: 'strict'`,输出不过 SvgBlock(它的 scoped `<style>` 是承重的,strict 模式自带消毒);全部 29 个图型家族 `useMaxWidth: false`(默认的 `width="100%"` 在 fit-content 包裹层里会塌缩成小图,踩过);首帧量宽自动适配缩放(只缩不放),悬停缩放芯片 50%–400%,芯片点击回 100%。加载中/语法错误都回落成普通代码块,零成本。测试在 `tests/mermaid.client.spec.tsx`(mock mermaid,5 条);流式期间保持普通代码块的条件别动,理由同嵌入管道。三通道分工:拓扑 → mermaid,自由图形 → show_svg,数据组件 → show_ui,lite preset 的 persona 已写明。
+
 ## 第三步(暂缓,做的时候从这里起步)
 
 - **action 白名单**:json-render 已装的 0.19.0 支持 `catalog.actions` + `defineRegistry`/`JSONUIProvider` 的 `handlers`。第一个 action 建议是"往输入框插文本":handler 侧要拿 composer 的写入面,查 `conversation.composer` chain slot 或 ui-conversation 的 service。加 action 时 UiEmbed 需要从 `createRenderer` 换成 `JSONUIProvider` + `Renderer` 以传 handlers。
