@@ -138,7 +138,7 @@ export function apply(ctx: Context, config: Config): void {
 
   ctx.tools.register(defineTool({
     name: 'show_svg',
-    description: 'Register a static SVG graphic for display and return its reference id. Place the graphic in your reply by writing `![<title>](dsh-svg://<id>)` on its own line where it should appear. Provide complete, self-contained SVG markup with a viewBox; scripts and external resources are stripped before display.',
+    description: 'Register a static SVG graphic for display and return its reference id. Place the graphic in your reply by writing `![<title>](dsh-svg://<id>)` on its own line where it should appear. Provide complete, self-contained SVG markup with a viewBox; scripts and external resources are stripped before display. Display envelope: the graphic scales to a chat card roughly 600-1000 CSS px wide (design for about 800), and heights beyond 480 px are cut off behind a scrollbar, so keep the aspect ratio within about 5:3 and size text to stay readable at that scale. The card supplies a theme-matched background and text color for both light and dark themes. For strokes and text whose readability would flip with the theme (near-black or near-white neutrals), use currentColor; a deliberate palette that stays readable in both themes is fine as designed. Leave the background transparent unless the graphic has a reason to bring its own.',
     parameters: {
       svg: { type: 'string', required: true, description: 'Complete SVG markup, from <svg> to </svg>. Must include a viewBox. No scripts, no external references.' },
       title: { type: 'string', description: 'Short title describing the graphic, shown as the card header.' },
