@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime, { type ToolExecutionResult } from '@deepseek-ai/dsh-tools'
 import type { ToolResult } from '@deepseek-ai/dsh-tools'
@@ -25,7 +25,7 @@ async function mountTools(
   await ctx.plugin(ToolRuntime)
   await ctx.plugin(ToolShowSvg, config)
   let counter = 0
-  const call = (args: unknown) => ctx.tools.execute({ signal: testToolSignal, callId: CallId(`call-${++counter}`), name: 'show_svg', arguments: args })
+  const call = (args: unknown) => ctx.tools.execute({ signal: testToolSignal, callId: ToolCallId(`call-${++counter}`), name: 'show_svg', arguments: args })
   return { ctx, call }
 }
 

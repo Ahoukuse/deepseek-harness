@@ -8,6 +8,7 @@ import { diffCardModel } from '../models/diff-card-model.ts'
 import { searchCardModel } from '../models/search-card-model.ts'
 import { terminalCardModel, terminalFailed } from '../models/terminal-card-model.ts'
 import { webCardModel } from '../models/web-card-model.ts'
+import { svgCardModel } from '../models/svg-card-model.ts'
 import { toolRowModel, type ToolRowVariant } from '../models/tool-call-model.ts'
 import { ToolRow } from '../components/ToolRow.tsx'
 
@@ -34,6 +35,7 @@ export function GenericToolCard({ toolName, block, cwd, home, openFile, inspect,
   const diff = diffCardModel(block)
   const search = searchCardModel(block)
   const web = webCardModel(block)
+  const svg = svgCardModel(block)
   // A failing exit status is the terminal card's own error signal (the call
   // itself settles isError:false), surfaced as the row's red state dot.
   const state = model.state === 'ok' && terminal !== null && terminalFailed(terminal)
@@ -47,7 +49,8 @@ export function GenericToolCard({ toolName, block, cwd, home, openFile, inspect,
       toolName={toolName}
       icon={VARIANT_ICONS[model.variant]}
       title={t(model.titleKey)}
-      summary={model.summary}
+      // An svg result view's replacement title outranks the args-derived summary.
+      summary={svg?.title ?? model.summary}
       // Single-file tools never expose an args body — the path link is the only
       // args interaction. A card is not an args body: a read/write/edit row is
       // single-file AND carries a card, so the card expands under the path link.
@@ -59,6 +62,7 @@ export function GenericToolCard({ toolName, block, cwd, home, openFile, inspect,
       read={read}
       search={search}
       web={web}
+      svg={svg}
       state={state}
       filePath={model.filePath}
       onOpenFile={singleFile ? openFile : undefined}

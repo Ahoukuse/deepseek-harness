@@ -1,0 +1,35 @@
+/* Geometry mirrors CodeBlock/TerminalBlock/WebBlock (12px radius, code-block
+   surface, 16px vertical margin) so the graphic card reads as one family with
+   them. The canvas caps its height and scrolls in place, the same posture as
+   WebBlock's source list, so a tall graphic never takes over the message flow. */
+
+.block {
+  --dsl-svg-radius: 12px;
+
+  margin: 16px 0;
+  padding: 12px 14px;
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-markdown-code-block);
+  border-radius: var(--dsl-svg-radius);
+}
+
+/* The graphic itself: the inline <svg> keeps its intrinsic aspect ratio and
+   shrinks to the card width; `max-height` + scroll keeps a tall graphic from
+   dominating the column. `color` gives `currentColor` artwork a theme-correct
+   default. */
+.canvas {
+  display: flex;
+  justify-content: center;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.canvas > :global(svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+.invalid {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}

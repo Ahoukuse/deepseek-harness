@@ -7,6 +7,7 @@ import type { AssistantBlock } from '../contract/snapshot.ts'
 import { markdownLabels } from '../markdown-labels.ts'
 import { ReasoningRow } from './ReasoningRow.tsx'
 import { useSearchableHidden } from './searchable-hidden.ts'
+import { splitEmbedRefs, type EmbedTextSegment } from './embed-refs.ts'
 import css from './AssistantMarkdown.module.css'
 
 /**
@@ -38,6 +39,8 @@ export interface AssistantMarkdownProps {
   revealProcess?: (() => void) | undefined
   /** Resolved prose file mentions for this Assistant's closing turn. */
   mentions?: MarkdownFileMentions | undefined
+  /** Render one settled embed-reference line through the keyed embed slot. */
+  renderEmbed?: ((segment: Extract<EmbedTextSegment, { kind: 'embed' }>) => ReactNode) | undefined
   /** The owning view's locale seat, passed down as a plain prop. */
   t: ChatViewSlotProps['t']
 }
@@ -45,7 +48,7 @@ export interface AssistantMarkdownProps {
 /** Reasoning block as the Think variant summary row (figma 39:28304). */
 export const AssistantMarkdown = memo(function AssistantMarkdown({
   blocks, streaming, interrupted, renderMessageImages,
-  reasoningHidden = false, revealProcess, mentions, t,
+  reasoningHidden = false, revealProcess, mentions, renderEmbed, t,
 }: AssistantMarkdownProps) {
   // Stable per locale revision (t identity changes on switch): a fresh object
   // per render would rebuild MarkdownText's component table every chunk.
@@ -70,18 +73,45 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     const block = blocks[i]
     if (block === undefined) continue
     switch (block.kind) {
-      case 'text':
-        rendered.push(
-          <MarkdownText
-            key={i}
-            text={block.text}
-            streaming={streaming}
-            labels={labels}
-            fileMentions={mentions}
-            pathImages={pathImages}
-          />,
-        )
+      case 'text': {
+        // Embed references split only once the node settles: streaming text
+        // keeps the one incremental MarkdownText (whose non-http image rule
+        // shows the reference's alt text until then), so the incremental
+        // parser's block cache never sees shifting segment boundaries.
+        const segments = streaming || renderEmbed === undefined
+          ? null
+          : splitEmbedRefs(block.text)
+        if (segments === null || renderEmbed === undefined || !segments.some(segment => segment.kind === 'embed')) {
+          rendered.push(
+            <MarkdownText
+              key={i}
+              text={block.text}
+              streaming={streaming}
+              labels={labels}
+              fileMentions={mentions}
+              pathImages={pathImages}
+            />,
+          )
+          break
+        }
+        for (let s = 0; s < segments.length; s++) {
+          const segment = segments[s]
+          if (segment === undefined) continue
+          rendered.push(segment.kind === 'text'
+            ? (
+              <MarkdownText
+                key={`${i}:${s}`}
+                text={segment.text}
+                streaming={false}
+                labels={labels}
+                fileMentions={mentions}
+                pathImages={pathImages}
+              />
+            )
+            : <Fragment key={`${i}:${s}`}>{renderEmbed(segment)}</Fragment>)
+        }
         break
+      }
       case 'reasoning':
         rendered.push(
           <ProcessReasoning

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime, { type ToolExecutionResult } from '@deepseek-ai/dsh-tools'
 import * as ToolShowUi from '@deepseek-ai/dsh-tool-show-ui'
@@ -23,7 +23,7 @@ async function mountTools(config: ToolShowUi.Config = {}): Promise<{ call: (args
   await ctx.plugin(ToolRuntime)
   await ctx.plugin(ToolShowUi, config)
   let counter = 0
-  const call = (args: unknown) => ctx.tools.execute({ signal: testToolSignal, callId: CallId(`call-${++counter}`), name: 'show_ui', arguments: args })
+  const call = (args: unknown) => ctx.tools.execute({ signal: testToolSignal, callId: ToolCallId(`call-${++counter}`), name: 'show_ui', arguments: args })
   return { call }
 }
 

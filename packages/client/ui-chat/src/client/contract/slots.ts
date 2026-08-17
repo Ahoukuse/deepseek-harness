@@ -19,6 +19,7 @@ import type {
   ChatNodeProcessSource, ChatNodeSource, ChatSnapshot, ChatTurnProcessPresentation,
 } from './snapshot.ts'
 import type { TurnProcessSpec } from './turn-process.ts'
+import type { ChatEmbedOwnerProps } from '../chat/embed-refs.ts'
 import type { TranscriptViewMode } from '../../chat-settings.ts'
 
 /** Selector hook over the current Conversation binding's Chat target. */
@@ -203,6 +204,13 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * replaces that command renderer; an unoccupied key uses the generic card.
      */
     'conversation.chat.commandview': { kind: 'keyed'; scope: 'session'; owner: CommandRowOwnerProps }
+    /**
+     * Prose embed keyed by reference scheme. A display tool returns an id, the
+     * model writes `![title](<scheme>://<id>)` on its own line, and the
+     * assistant renderer routes that line here. An unclaimed scheme falls back
+     * to ordinary markdown, degrading the line to its alt text.
+     */
+    'conversation.chat.embed': { kind: 'keyed'; scope: 'session'; owner: ChatEmbedOwnerProps }
     /**
      * Selector-routed extension before a completed Turn's action row. The
      * component receives the Turn, closing sequence, and file opener. The first

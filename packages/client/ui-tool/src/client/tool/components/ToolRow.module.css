@@ -295,6 +295,10 @@
   margin: 4px 0 4px 4px;
 }
 
+.svgBody {
+  margin: 4px 0 4px 4px;
+}
+
 /* The recovery footer for a capped search: the result text (its `Full … stored
    at …` locator) below the card in the muted tone, since the card holds only the
    retained rows. Same column indent as the card body. */
