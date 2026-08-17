@@ -137,7 +137,9 @@ export interface ReadFileLine {
  * `ToolDefinition.presentResult`; omitting the method keeps the pending
  * title and renders the raw result content.
  */
-export type ToolResultView = GenericResultView | TerminalResultView | DiffResultView | SearchResultView | ReadResultView | WebResultView
+export type ToolResultView =
+  | GenericResultView | TerminalResultView | DiffResultView
+  | SearchResultView | ReadResultView | WebResultView | SvgResultView
 
 /**
  * The default completed card: an optional replacement title and reformatted
@@ -305,6 +307,25 @@ export interface ReadResultView {
    * the read capability. Omit to let such a UI render the raw result content.
    */
   content?: ContentBlock[]
+}
+
+/**
+ * A completed `show_svg` call rendered as an inline vector graphic by a capable
+ * UI. Result-only, like {@link SearchResultView}: the pending state stays a
+ * {@link GenericCallView} because the graphic renders once, on settle. The view
+ * carries the UNSANITIZED markup straight from the call arguments (a pure
+ * projection — the presenter cannot sanitize, and a sanitizer choice belongs to
+ * each UI); every consumer MUST treat `svg` as untrusted model output and
+ * sanitize before inlining, or render it in a context where scripts cannot run.
+ * A UI without the `svg` capability falls back to the raw `tool/result`
+ * content (this view carries no `content` copy).
+ */
+export interface SvgResultView {
+  card: 'svg'
+  /** Replacement title for the completed call. Omit to keep the pending-state title. */
+  title?: string
+  /** The untrusted SVG markup to display; consumers sanitize before inlining. */
+  svg: string
 }
 
 /**

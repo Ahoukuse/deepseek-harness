@@ -2965,6 +2965,38 @@ export interface Config {
 
 Source: [`packages/session-query/tool-session-query/src/index.ts:28`](../packages/session-query/tool-session-query/src/index.ts)
 
+<a id="deepseek-aidsh-tool-show-svg"></a>
+
+## `@deepseek-ai/dsh-tool-show-svg`
+
+Requires: `tools` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: the markup size cap. */
+export interface Config {
+  /** Upper bound on one `show_svg` call's markup length, in characters. Defaults to 512000. */
+  maxSvgChars?: number
+}
+```
+
+Source: [`packages/interaction/tool-show-svg/src/index.ts:33`](../packages/interaction/tool-show-svg/src/index.ts)
+
+<a id="deepseek-aidsh-tool-show-ui"></a>
+
+## `@deepseek-ai/dsh-tool-show-ui`
+
+Requires: `tools` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: the spec size cap. */
+export interface Config {
+  /** Upper bound on one `show_ui` call's serialized spec length, in characters. Defaults to 262144. */
+  maxSpecChars?: number
+}
+```
+
+Source: [`packages/interaction/tool-show-ui/src/index.ts:28`](../packages/interaction/tool-show-ui/src/index.ts)
+
 <a id="deepseek-aidsh-tool-skill"></a>
 
 ## `@deepseek-ai/dsh-tool-skill`
@@ -3189,7 +3221,7 @@ export interface Config {
 export type ToolPresentationMode = 'native' | 'ptc' | 'both'
 ```
 
-Source: [`packages/core/tools/src/index.ts:647`](../packages/core/tools/src/index.ts)
+Source: [`packages/core/tools/src/index.ts:648`](../packages/core/tools/src/index.ts)
 
 <a id="deepseek-aidsh-typert-loader"></a>
 

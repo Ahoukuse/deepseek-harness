@@ -16,6 +16,8 @@ This table connects model-visible tool names to the plugin package and service s
 | Tool package | Model-visible names | Requires | Writes / affects | Shipped aliases | Deployment note |
 | --- | --- | --- | --- | --- | --- |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
+| `@deepseek-ai/dsh-tool-show-svg` | `show_svg` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | show_svg carries the graphic in its call arguments; the UI sanitizes before inlining, so the tool itself performs no I/O. |
+| `@deepseek-ai/dsh-tool-show-ui` | `show_ui` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | show_ui carries the widget spec in its call arguments; the web client renders it through a zod-validated component catalog with no actions. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/ptc-dispatch-start + tool/ptc-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: ptc` / `mode: both` (see the PTC mode Agent Note). Under `ptc` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
 | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`, `ctx.shell`, `ctx.systemPrompt`, `ctx.shellEnv`, `ctx.jobs at call time for run_in_background` | `tool/call`, `tool/result` | - | The bash tool is the model-facing consumer of the bash executor seam. A `run_in_background` run registers with the generic `ctx.jobs` runtime and is collected/stopped through the `job_*` tools from `@deepseek-ai/dsh-tool-jobs`; the `enableRunInBackground` config (default true) removes the parameter entirely when disabled. |
@@ -115,6 +117,69 @@ Ask the user a concise question when you need confirmation, a choice, or missing
 Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question pauses the tool call until the active UI provider returns a human answer.
+
+<a id="deepseek-aidsh-tool-show-svg"></a>
+
+## `@deepseek-ai/dsh-tool-show-svg`
+
+### `show_svg`
+
+Register a static SVG graphic for display and return its reference id. Place the graphic in your reply by writing `![<title>](dsh-svg://<id>)` on its own line where it should appear. Provide complete, self-contained SVG markup with a viewBox; scripts and external resources are stripped before display.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "svg": {
+      "type": "string",
+      "description": "Complete SVG markup, from <svg> to </svg>. Must include a viewBox. No scripts, no external references."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title describing the graphic, shown as the card header."
+    }
+  },
+  "required": [
+    "svg"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-show-svg/src/index.ts`](../packages/interaction/tool-show-svg/src/index.ts)
+
+show_svg carries the graphic in its call arguments; the UI sanitizes before inlining, so the tool itself performs no I/O.
+
+<a id="deepseek-aidsh-tool-show-ui"></a>
+
+## `@deepseek-ai/dsh-tool-show-ui`
+
+### `show_ui`
+
+Register a dashboard-style widget for inline display and return its reference id. Place it in your reply by writing `![<title>](dsh-ui://<id>)` on its own line. The spec is a flat element tree: {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":[...]}}}. Components: Stack{direction?:"row"|"column",gap?} (children), Grid{columns:1-6} (children), Card{title?} (children), Text{content,variant?:"title"|"body"|"caption"}, Metric{label,value,unit?,delta?,trend?:"up"|"down"|"flat"}, Badge{label,tone?:"neutral"|"success"|"warning"|"danger"}, Progress{label?,value:0-100}, Table{columns:string[],rows:string[][]}, BarChart{title?,items:[{label,value}],unit?}, LineChart{title?,points:[{label,value}](min 2),unit?}, Sparkline{values:number[](min 2),label?}.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "object",
+      "description": "The widget spec: a flat tree with \"root\" and \"elements\", using only catalog components.",
+      "additionalProperties": true
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title describing the widget, shown as the card header."
+    }
+  },
+  "required": [
+    "spec"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-show-ui/src/index.ts`](../packages/interaction/tool-show-ui/src/index.ts)
+
+show_ui carries the widget spec in its call arguments; the web client renders it through a zod-validated component catalog with no actions.
 
 <a id="deepseek-aidsh-tools"></a>
 

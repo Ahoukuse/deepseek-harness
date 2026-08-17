@@ -238,6 +238,12 @@
 - id: tool-ask-user
   name: '@deepseek-ai/dsh-tool-ask-user'
 
+- id: tool-show-svg
+  name: '@deepseek-ai/dsh-tool-show-svg'
+
+- id: tool-show-ui
+  name: '@deepseek-ai/dsh-tool-show-ui'
+
 - id: tool-todo
   name: '@deepseek-ai/dsh-tool-todo'
   config:

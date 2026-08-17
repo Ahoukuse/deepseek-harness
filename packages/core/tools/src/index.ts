@@ -120,6 +120,7 @@ export type {
   SearchFileMatches,
   SearchLineMatch,
   ReadResultView,
+  SvgResultView,
   WebResultView,
   WebSearchResultView,
   WebFetchResultView,

@@ -28,6 +28,8 @@ import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
 import type { ImageAttachmentLimits, ImageAttachmentRef, SaveImageAttachment, StoredImageAttachment } from '@deepseek-ai/dsh-attachment'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import * as ToolShowSvg from '@deepseek-ai/dsh-tool-show-svg'
+import * as ToolShowUi from '@deepseek-ai/dsh-tool-show-ui'
 import PlanModeController from '@deepseek-ai/dsh-plan-mode'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import * as WebSearchExa from '@deepseek-ai/dsh-web-search-exa'
@@ -200,6 +202,30 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'ask_user_question pauses the tool call until the active UI provider returns a human answer.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-show-svg',
+    dir: 'tool-show-svg',
+    source: 'packages/interaction/tool-show-svg/src/index.ts',
+    requires: ['ctx.tools', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ToolShowSvg)
+    },
+    note:
+      'show_svg carries the graphic in its call arguments; the UI sanitizes before inlining, so the tool itself performs no I/O.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-show-ui',
+    dir: 'tool-show-ui',
+    source: 'packages/interaction/tool-show-ui/src/index.ts',
+    requires: ['ctx.tools', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ToolShowUi)
+    },
+    note:
+      'show_ui carries the widget spec in its call arguments; the web client renders it through a zod-validated component catalog with no actions.',
   },
   {
     pkg: '@deepseek-ai/dsh-tools',
