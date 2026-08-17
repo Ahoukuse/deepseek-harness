@@ -1,0 +1,3 @@
+name: 轻量模式
+description: 精简编码 Agent：Shell、文件读写、Skills、上下文压缩，以及 show_svg/show_ui 可视化展示工具。
+order: 5
