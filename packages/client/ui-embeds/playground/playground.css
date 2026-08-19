@@ -1,0 +1,99 @@
+/* Playground chrome only; widget styling comes from widgets.module.css. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  background: var(--dsw-alias-bg-base, #fff);
+  color: var(--dsw-alias-label-primary, #111);
+}
+
+.pg-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pg-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--dsw-alias-separator, rgb(127 127 127 / 25%));
+  font-size: 13px;
+}
+
+.pg-toolbar select,
+.pg-toolbar button {
+  font: inherit;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--dsw-alias-separator, rgb(127 127 127 / 25%));
+  background: var(--dsw-alias-bg-layer-1, transparent);
+  color: inherit;
+  cursor: pointer;
+}
+
+.pg-status {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary, #777);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pg-status-error {
+  color: var(--dsw-alias-functional-error, #d1242f);
+}
+
+.pg-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.pg-editor {
+  flex: 0 0 42%;
+  min-width: 280px;
+  resize: none;
+  border: none;
+  border-right: 1px solid var(--dsw-alias-separator, rgb(127 127 127 / 25%));
+  outline: none;
+  padding: 14px;
+  font-family: Consolas, 'Cascadia Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--dsw-alias-bg-base, #fff);
+  color: var(--dsw-alias-label-primary, #111);
+  tab-size: 2;
+}
+
+.pg-preview {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+/* Cap the preview at chat-bubble width so layouts read like the real thing. */
+.pg-bubble {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.pg-error {
+  color: var(--dsw-alias-functional-error, #d1242f);
+  font-size: 13px;
+  padding: 12px;
+  border: 1px dashed var(--dsw-alias-functional-error, #d1242f);
+  border-radius: 8px;
+}

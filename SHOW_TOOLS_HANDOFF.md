@@ -17,7 +17,8 @@
 | 文件 | 职责 |
 |---|---|
 | `packages/interaction/tool-show-svg/src/index.ts` | `show_svg(svg, title?)`:校验(非空、大小上限默认 512K、`<svg>` 根、禁 DOCTYPE/ENTITY,注意 DTD 检查必须在根检查之前)、返回 `{svgId, chars}`、回执带精确引用行、系统提示词 order 115 |
-| `packages/interaction/tool-show-ui/src/index.ts` | `show_ui(spec, title?)`:浅校验(大小上限默认 256K、root/elements 扁平树形状)、返回 `{uiId, chars}`、系统提示词 order 116;`CATALOG_GUIDE` 字符串枚举组件目录,**必须与客户端 catalog.tsx 同步改** |
+| `packages/interaction/tool-show-ui/src/index.ts` | `show_ui(spec, title?)`:浅校验(大小上限默认 256K、root/elements 扁平树形状)、返回 `{uiId, chars}`;系统提示词 order 116 和工具描述都只做功能路由("先加载 show-ui-catalog skill") |
+| `packages/interaction/tool-show-ui/skills/show-ui-catalog/SKILL.md` | 面向模型的组件目录参考(2026-08-17 起,原 `CATALOG_GUIDE` 拆出),按需经 skill tool 加载;**必须与客户端 catalog.tsx 同步改**;通过 `~/.dsh/skills/show-ui-catalog` junction 进入用户 skill 根被发现(新机器要重建 junction) |
 
 客户端(一个真正的 `dsh.client` 插件 + 散在既有包里的 svg 遗留件):
 
@@ -26,8 +27,9 @@
 | `packages/client/ui-embeds/src/client/index.ts` | 插件入口:向 `conversation.chat.embed` slot 注册 `dsh-svg`/`dsh-ui` 两个 key |
 | `packages/client/ui-embeds/src/client/resolve.ts` | 按 callId 深搜工具节点树(含 subCalls);svg 走"渲染意图优先、参数回退",ui 纯参数;**参数回退是承重墙**,Code Mode 嵌套子调用没有渲染意图视图 |
 | `packages/client/ui-embeds/src/client/embeds.tsx` | SvgEmbed / UiEmbed 组件;UiEmbed 带错误边界,目录不合法降级为提示 |
-| `packages/client/ui-embeds/src/client/catalog.tsx` | json-render 目录 + `createRenderer` 实现;11 个组件(Stack/Grid/Card/Text/Metric/Badge/Progress/Table/BarChart/LineChart/Sparkline);`defineCatalog` 必须带 `actions: {}`,缺了 props 类型推断整个崩掉 |
+| `packages/client/ui-embeds/src/client/catalog.tsx` | json-render 目录 + `createRenderer` 实现;16 个组件(布局 Stack/Grid/Card,内容 Text/Metric/Badge/Progress/Table,图表 BarChart/ColumnChart/LineChart/MultiLineChart/Sparkline/PieChart/StackedBarChart/ScatterPlot);布局三件套带对齐/跨列/密度 props(Stack align/justify/wrap、Grid spans、Card subtitle/dense);`defineCatalog` 必须带 `actions: {}`,缺了 props 类型推断整个崩掉 |
 | `packages/client/ui-embeds/src/client/widgets.module.css` | 组件样式,全部 `--dsw-*` token |
+| `packages/client/ui-embeds/playground/` | 开发用 spec playground:左 JSON 右实时渲染,带预设/亮暗切换/坏 JSON 容错;`pnpm -C packages/client/ui-embeds playground` 起 vite(127.0.0.1:5175,显式绑 IPv4,此机上默认 localhost 只落 `[::1]`);引真 catalog + ui-theme token 表,vite 为此进了包 devDependencies;tsconfig 只含 src,不进库构建 |
 | `packages/client/ui-conversation/src/client/chat/embed-refs.ts` | scheme 无关的引用行正则与切段器(`splitEmbedRefs`);owner props 类型 |
 | `packages/client/ui-conversation/src/client/chat/AssistantMarkdown.tsx` | 只在 `!streaming` 且有 renderEmbed 时切段;流式保持单个增量 MarkdownText,别动这个条件 |
 | `packages/client/ui-conversation/src/client/chat/AssistantNodeView.tsx` | 组装 renderEmbed 回调(renderSlot + entryKey=scheme + fallback=raw 行) |
@@ -60,7 +62,7 @@ pnpm exec vitest run packages/interaction/tool-show-svg packages/interaction/too
 1. **id = callId**:会话内唯一、随日志持久化,回放免费。别换成随机数(规则:脚本环境里 Date.now/Math.random 会破坏回放)。
 2. **解析走参数而非渲染意图**:Code Mode(PTC 模式)下工具经 `run_code` 嵌套执行,嵌套分发按仓库契约不携带渲染意图视图。show_svg 的 svg 意图保留是为了其他 UI 的降级渲染,但客户端解析必须有参数回退。show_ui 从一开始就纯参数。
 3. **只切定稿文本**:MarkdownText 的增量解析器冻结已完成块,流式中切段会让它的缓存看见漂移的边界。流式期间引用行显示为 alt 文字是有意的过渡态。
-4. **catalog 是安全边界**:v1 无 action,模型点不出副作用。宿主校验有意浅(它无法 import 浏览器目录),`CATALOG_GUIDE` 与 catalog.tsx 是手动同步的双胞胎。
+4. **catalog 是安全边界**:v1 无 action,模型点不出副作用。宿主校验有意浅(它无法 import 浏览器目录);面向模型的目录参考在 `skills/show-ui-catalog/SKILL.md`,与 catalog.tsx 是手动同步的双胞胎(提示词与工具描述不再枚举组件,只路由到该 skill,按需加载省每请求 token)。
 5. **一个客户端插件、两个宿主包**:部署可以只装 svg 不装 ui;ui-embeds 里没被工具喂数据的那半是无害死代码。
 
 ## 第三条通道:mermaid 围栏(2026-08-17 加)
@@ -71,7 +73,7 @@ pnpm exec vitest run packages/interaction/tool-show-svg packages/interaction/too
 
 - **action 白名单**:json-render 已装的 0.19.0 支持 `catalog.actions` + `defineRegistry`/`JSONUIProvider` 的 `handlers`。第一个 action 建议是"往输入框插文本":handler 侧要拿 composer 的写入面,查 `conversation.composer` chain slot 或 ui-conversation 的 service。加 action 时 UiEmbed 需要从 `createRenderer` 换成 `JSONUIProvider` + `Renderer` 以传 handlers。
 - **流式渐进渲染**:核心库有 `createSpecStreamCompiler`/`applySpecStreamPatch`;难点不在渲染在传输,要接工具参数的流式通道,工程量大,确认需求再做。
-- **加组件**:catalog.tsx 加 zod 定义 + 实现 + CSS,tool-show-ui 的 CATALOG_GUIDE 同步,ui-embeds 测试加一条渲染断言。半小时的事,LineChart/Sparkline 那两个 commit 就是模板。
+- **加组件**:catalog.tsx 加 zod 定义 + 实现 + CSS,`skills/show-ui-catalog/SKILL.md` 同步,ui-embeds 测试加一条渲染断言。半小时的事,LineChart/Sparkline 那两个 commit 就是模板。图表类组件的系列颜色走 widgets.module.css 的 `--dsh-cat-*` 色板(dataviz 六检校验过,槽位顺序即安全机制,散点上限 3 系列是全对校验的边界)。
 
 ## 已知欠账(自用无碍,合上游前要清)
 

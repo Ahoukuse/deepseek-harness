@@ -4,8 +4,9 @@
  * rendering. Pure presentation — `execute` validates shallowly and returns a
  * reference id; the web client's `ui-embeds` plugin resolves the persisted
  * arguments and renders through its zod-validated component catalog, which is
- * the real vocabulary and security boundary. The component enumeration in
- * this module's guidance text and the client catalog MUST evolve together.
+ * the real vocabulary and security boundary. The model-facing component
+ * reference lives in the bundled `show-ui-catalog` skill beside this package;
+ * that document and the client catalog MUST evolve together.
  * @module @deepseek-ai/dsh-tool-show-ui
  */
 
@@ -92,8 +93,15 @@ export function presentShowUiCall(args: ShowUiArgs): GenericCallView {
   return { card: 'generic', title: cardTitle(args) }
 }
 
-/** The catalog vocabulary, enumerated for the model (client catalog is authoritative). */
-const CATALOG_GUIDE = 'Components: Stack{direction?:"row"|"column",gap?} (children), Grid{columns:1-6} (children), Card{title?} (children), Text{content,variant?:"title"|"body"|"caption"}, Metric{label,value,unit?,delta?,trend?:"up"|"down"|"flat"}, Badge{label,tone?:"neutral"|"success"|"warning"|"danger"}, Progress{label?,value:0-100}, Table{columns:string[],rows:string[][]}, BarChart{title?,items:[{label,value}],unit?}, LineChart{title?,points:[{label,value}](min 2),unit?}, Sparkline{values:number[](min 2),label?}.'
+/**
+ * The component reference lives in the bundled `show-ui-catalog` skill
+ * (`skills/show-ui-catalog/SKILL.md` beside this package), loaded on demand
+ * through the skill tool; the prompt section below only routes to it. The
+ * skill document and the client catalog (`ui-embeds/src/client/catalog.tsx`)
+ * MUST evolve together — the client's zod catalog stays the authoritative
+ * validation boundary.
+ */
+const CATALOG_SKILL = 'show-ui-catalog'
 
 /**
  * Register the `show_ui` tool and its system-prompt guidance. The tool's
@@ -110,12 +118,12 @@ export function apply(ctx: Context, config: Config): void {
   ctx.systemPrompt.section({
     name: 'tool:show_ui',
     order: 116,
-    text: `Use the show_ui tool to register a dashboard-style widget (metrics, tables, charts), then place it in your reply: the tool returns an id, and writing \`![<title>](dsh-ui://<id>)\` on its own line renders the widget at that spot. Always place every registered widget this way. The spec is a flat tree: {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":["<key>"...]}}}. ${CATALOG_GUIDE} No other component types exist; widgets are display-only.`,
+    text: `When a result calls for a dashboard-style widget (metrics, tables, charts), use the show_ui tool; before authoring a spec, load the ${CATALOG_SKILL} skill with the skill tool for the complete component reference. After registering, place the widget by writing \`![<title>](dsh-ui://<id>)\` on its own line in your reply.`,
   })
 
   ctx.tools.register(defineTool({
     name: 'show_ui',
-    description: `Register a dashboard-style widget for inline display and return its reference id. Place it in your reply by writing \`![<title>](dsh-ui://<id>)\` on its own line. The spec is a flat element tree: {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":[...]}}}. ${CATALOG_GUIDE}`,
+    description: `Register a dashboard-style widget (metrics, tables, charts) for inline display and return its reference id. Place it in your reply by writing \`![<title>](dsh-ui://<id>)\` on its own line. The spec is a flat element tree {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":[...]}}} using only cataloged components; load the ${CATALOG_SKILL} skill for the component reference before authoring a spec.`,
     parameters: {
       spec: { type: 'object', required: true, additionalProperties: true, description: 'The widget spec: a flat tree with "root" and "elements", using only catalog components.' },
       title: { type: 'string', description: 'Short title describing the widget, shown as the card header.' },
