@@ -124,7 +124,7 @@ ask_user_question pauses the tool call until the active UI provider returns a hu
 
 ### `show_svg`
 
-Register a static SVG graphic for display and return its reference id. Place the graphic in your reply by writing `![<title>](dsh-svg://<id>)` on its own line where it should appear. Provide complete, self-contained SVG markup with a viewBox; scripts and external resources are stripped before display.
+Register a static SVG graphic for display and return its reference id. Place the graphic in your reply by writing `![<title>](dsh-svg://<id>)` on its own line where it should appear. Provide complete, self-contained SVG markup with a viewBox; scripts and external resources are stripped before display. Display envelope: the graphic scales to a chat card roughly 600-1000 CSS px wide (design for about 800), and heights beyond 480 px are cut off behind a scrollbar, so keep the aspect ratio within about 5:3 and size text to stay readable at that scale. The card supplies a theme-matched background and text color for both light and dark themes. For strokes and text whose readability would flip with the theme (near-black or near-white neutrals), use currentColor; a deliberate palette that stays readable in both themes is fine as designed. Leave the background transparent unless the graphic has a reason to bring its own.
 
 ```json
 {
@@ -155,7 +155,7 @@ show_svg carries the graphic in its call arguments; the UI sanitizes before inli
 
 ### `show_ui`
 
-Register a dashboard-style widget for inline display and return its reference id. Place it in your reply by writing `![<title>](dsh-ui://<id>)` on its own line. The spec is a flat element tree: {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":[...]}}}. Components: Stack{direction?:"row"|"column",gap?} (children), Grid{columns:1-6} (children), Card{title?} (children), Text{content,variant?:"title"|"body"|"caption"}, Metric{label,value,unit?,delta?,trend?:"up"|"down"|"flat"}, Badge{label,tone?:"neutral"|"success"|"warning"|"danger"}, Progress{label?,value:0-100}, Table{columns:string[],rows:string[][]}, BarChart{title?,items:[{label,value}],unit?}, LineChart{title?,points:[{label,value}](min 2),unit?}, Sparkline{values:number[](min 2),label?}.
+Register a dashboard-style widget (metrics, tables, charts) for inline display and return its reference id. Place it in your reply by writing `![<title>](dsh-ui://<id>)` on its own line. The spec is a flat element tree {"root":"<key>","elements":{"<key>":{"type":"<Component>","props":{...},"children":[...]}}} using only cataloged components; load the show-ui-catalog skill for the component reference before authoring a spec.
 
 ```json
 {

@@ -260,6 +260,7 @@
     { "path": "./packages/shell/shell-env" },
     { "path": "./packages/shell/pwsh-local" },
     { "path": "./packages/shell/pwsh-sandbox" },
+    { "path": "./packages/shell/wsl-local" },
     { "path": "./packages/shell/tool-pwsh" },
     { "path": "./native/system/packages/entry" },
     { "path": "./packages/sandbox/sandbox" },

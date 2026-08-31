@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { resolvePwshPath } from './packages/shell/pwsh-local/src/resolve.ts'
+import { resolveWslPath } from './packages/shell/wsl-local/src/resolve.ts'
 import { defineConfig } from 'vitest/config'
 import { standardDecoratorPlugin, vitestExecArgv } from './vitest.shared.ts'
 import { COVERAGE_EXEMPT_ENV, coverageExemptHeavySuites } from './scripts/coverage-exempt.ts'
@@ -116,6 +117,18 @@ const pwshCoverageExclusions = spawnSync(resolvePwshPath(), ['-NoLogo', '-NoProf
   : [
       'packages/shell/pwsh-local/src/index.ts',
       'packages/shell/pwsh-sandbox/src/**/*.ts',
+    ]
+
+// wsl-local's run/start/lifecycle suites self-skip without a usable WSL
+// (executor.spec.ts hasWsl), leaving this file far below per-file 100% on
+// WSL-less hosts; the exemption keeps those hosts green while Windows dev
+// machines with WSL still enforce the full bar. The probe runs the suites'
+// own resolution (the dependency-free resolve.ts module) and the executor's
+// own bash invocation, so the exemption is active exactly when the suites skip.
+const wslCoverageExclusions = spawnSync(resolveWslPath(), ['--exec', 'bash', '-c', 'true'], { encoding: 'utf8' }).status === 0
+  ? []
+  : [
+      'packages/shell/wsl-local/src/index.ts',
     ]
 
 const testIncludes = [
@@ -347,6 +360,7 @@ export default defineConfig({
         ...windowsOnlyCoverageExclusions,
         ...windowsRunnerCoverageExclusions,
         ...pwshCoverageExclusions,
+        ...wslCoverageExclusions,
       ],
       // 100% or it doesn't merge (docs/testing.md: excessive tests are welcome).
       // Per-file so a well-covered big file can't subsidize a bare one.

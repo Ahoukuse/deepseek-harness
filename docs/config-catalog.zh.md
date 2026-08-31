@@ -3472,6 +3472,47 @@ export interface Config {
 
 来源：[`packages/workflow/workflow-worker-thread/src/index.ts:32`](../packages/workflow/workflow-worker-thread/src/index.ts)
 
+<a id="deepseek-aidsh-wsl-local"></a>
+
+## `@deepseek-ai/dsh-wsl-local`
+
+需要：`subprocess`
+
+```ts config-catalog
+/** Plugin config (all optional — `static Config` supplies the defaults). */
+export interface Config {
+  /**
+   * Default working directory for commands (default: process.cwd()). Either
+   * dialect: a Windows path runs under its drvfs mount, a `/`-leading path is
+   * a Linux path inside the distribution.
+   */
+  cwd?: string
+  /** Default foreground timeout in milliseconds. */
+  timeoutMs?: number
+  /** Upper bound for per-call timeout overrides. */
+  maxTimeoutMs?: number
+  /** Per-stream in-memory output cap; overflow spills to a temp file. */
+  maxOutputBytes?: number
+  /** Per-stream spill-file cap; larger streams retain only their in-memory tail. */
+  maxSpillBytes?: number
+  /** Grace period for kill escalation and inherited pipes; at most `MAX_TIMER_DELAY_MS`. */
+  graceMs?: number
+  /**
+   * Explicit `wsl.exe` launcher. When omitted, the System32 launcher and PATH
+   * entries are probed in order, falling back to a bare `wsl.exe` resolved
+   * through PATH.
+   */
+  wslPath?: string
+  /**
+   * WSL distribution to run commands in (`wsl --distribution <name>`). When
+   * omitted, the host's default distribution runs them.
+   */
+  distribution?: string
+}
+```
+
+来源：[`packages/shell/wsl-local/src/index.ts:103`](../packages/shell/wsl-local/src/index.ts)
+
 ## 无配置的可加载插件
 
 这些插件通过 `cordis.yml` 中不含 `config:` 块的条目加载；它们未声明任何配置接口。

@@ -2995,7 +2995,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/interaction/tool-show-ui/src/index.ts:28`](../packages/interaction/tool-show-ui/src/index.ts)
+Source: [`packages/interaction/tool-show-ui/src/index.ts:29`](../packages/interaction/tool-show-ui/src/index.ts)
 
 <a id="deepseek-aidsh-tool-skill"></a>
 
@@ -3469,6 +3469,47 @@ export interface Config {
 ```
 
 Source: [`packages/workflow/workflow-worker-thread/src/index.ts:32`](../packages/workflow/workflow-worker-thread/src/index.ts)
+
+<a id="deepseek-aidsh-wsl-local"></a>
+
+## `@deepseek-ai/dsh-wsl-local`
+
+Requires: `subprocess`
+
+```ts config-catalog
+/** Plugin config (all optional — `static Config` supplies the defaults). */
+export interface Config {
+  /**
+   * Default working directory for commands (default: process.cwd()). Either
+   * dialect: a Windows path runs under its drvfs mount, a `/`-leading path is
+   * a Linux path inside the distribution.
+   */
+  cwd?: string
+  /** Default foreground timeout in milliseconds. */
+  timeoutMs?: number
+  /** Upper bound for per-call timeout overrides. */
+  maxTimeoutMs?: number
+  /** Per-stream in-memory output cap; overflow spills to a temp file. */
+  maxOutputBytes?: number
+  /** Per-stream spill-file cap; larger streams retain only their in-memory tail. */
+  maxSpillBytes?: number
+  /** Grace period for kill escalation and inherited pipes; at most `MAX_TIMER_DELAY_MS`. */
+  graceMs?: number
+  /**
+   * Explicit `wsl.exe` launcher. When omitted, the System32 launcher and PATH
+   * entries are probed in order, falling back to a bare `wsl.exe` resolved
+   * through PATH.
+   */
+  wslPath?: string
+  /**
+   * WSL distribution to run commands in (`wsl --distribution <name>`). When
+   * omitted, the host's default distribution runs them.
+   */
+  distribution?: string
+}
+```
+
+Source: [`packages/shell/wsl-local/src/index.ts:103`](../packages/shell/wsl-local/src/index.ts)
 
 ## Loadable plugins with no config
 
