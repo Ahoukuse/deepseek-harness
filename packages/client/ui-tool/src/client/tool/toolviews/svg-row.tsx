@@ -33,7 +33,7 @@ export function SvgRow({ toolName, block, inspect, t }: SvgRowProps) {
       icon={<IconDataOutline16 size={14} />}
       title="SVG"
       summary={svg?.title ?? model.summary}
-      body={null}
+      bodyRaw={null}
       // The receipt text is noise under the graphic, but it IS the row's
       // content when there is no card (an error, or a blank replayed payload).
       output={svg !== null ? null : model.output}
