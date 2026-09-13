@@ -97,7 +97,12 @@ describe('SvgRow', () => {
 
 describe('chat row svg body (GenericToolCard fallback)', () => {
   const ownerProps = (block: RunningToolCall | ToolResultNode): GenericToolCardProps => ({
-    callId: 'c1', toolName: 'show_svg', block, openFile: vi.fn(), t,
+    callId: 'c1',
+    toolName: 'show_svg',
+    block,
+    openFile: vi.fn(),
+    loadImage: vi.fn(() => Promise.reject(new Error('not used'))),
+    t,
   })
 
   it('the expanded fallback body is the same sanitized graphic', () => {
